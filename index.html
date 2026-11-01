@@ -351,6 +351,46 @@
       </div>
     </div>
 
+    <!-- 游戏模式 -->
+    <div class="control-panel">
+      <div class="panel-title">游戏模式</div>
+      <div class="toggle-group">
+        <div class="toggle-item">
+          <span class="toggle-label">人人对弈</span>
+          <div class="toggle-switch active" data-game-mode="pvp"></div>
+        </div>
+        <div class="toggle-item">
+          <span class="toggle-label">人机对弈</span>
+          <div class="toggle-switch" data-game-mode="pve"></div>
+        </div>
+      </div>
+      
+      <div id="pve-options" style="display: none; margin-top: 15px; padding-left: 20px; border-left: 2px solid #e0e0e0;">
+        <div class="toggle-group">
+          <div class="toggle-item">
+            <span class="toggle-label">玩家执黑</span>
+            <div class="toggle-switch active" data-player-color="black"></div>
+          </div>
+          <div class="toggle-item">
+            <span class="toggle-label">玩家执白</span>
+            <div class="toggle-switch" data-player-color="white"></div>
+          </div>
+          <div class="toggle-item">
+            <span class="toggle-label">AI 简单</span>
+            <div class="toggle-switch" data-ai-difficulty="easy"></div>
+          </div>
+          <div class="toggle-item">
+            <span class="toggle-label">AI 中等</span>
+            <div class="toggle-switch active" data-ai-difficulty="medium"></div>
+          </div>
+          <div class="toggle-item">
+            <span class="toggle-label">AI 困难</span>
+            <div class="toggle-switch" data-ai-difficulty="hard"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- 可视化模式 -->
     <div class="control-panel">
       <div class="panel-title">可视化模式</div>
@@ -1862,12 +1902,370 @@
       }
     }
 
+    // AI 接口（模块化设计，后续可替换）
+    class GoAI {
+      constructor(engine) {
+        this.engine = engine;
+        this.difficulty = 'medium'; // 'easy', 'medium', 'hard'
+      }
+
+      setDifficulty(level) {
+        this.difficulty = level;
+      }
+
+      // 获取 AI 的落子位置
+      getNextMove(color) {
+        const board = this.engine.getBoard();
+        const boardSize = this.engine.boardSize;
+        const validMoves = [];
+
+        // 收集所有合法落子点
+        for (let y = 0; y < boardSize; y++) {
+          for (let x = 0; x < boardSize; x++) {
+            const pos = { x, y };
+            if (this.engine.canPlaceStone(pos, color)) {
+              validMoves.push(pos);
+            }
+          }
+        }
+
+        if (validMoves.length === 0) return null;
+
+        // 根据难度选择不同的策略
+        switch (this.difficulty) {
+          case 'easy':
+            return this.getEasyMove(color, validMoves, board);
+          case 'medium':
+            return this.getMediumMove(color, validMoves, board);
+          case 'hard':
+            return this.getHardMove(color, validMoves, board);
+          default:
+            return this.getMediumMove(color, validMoves, board);
+        }
+      }
+
+      // 简单难度：随机落子，偶尔提子
+      getEasyMove(color, validMoves, board) {
+        // 10% 概率提子
+        if (Math.random() < 0.1) {
+          const captureMove = this.findCaptureMove(color, validMoves, board);
+          if (captureMove) return captureMove;
+        }
+        
+        // 随机落子
+        return validMoves[Math.floor(Math.random() * validMoves.length)];
+      }
+
+      // 中等难度：优先提子，优先连接，偶尔进攻
+      getMediumMove(color, validMoves, board) {
+        // 优先提子
+        const captureMove = this.findCaptureMove(color, validMoves, board);
+        if (captureMove) return captureMove;
+
+        // 30% 概率进攻
+        if (Math.random() < 0.3) {
+          const attackMove = this.findAttackMove(color, validMoves, board);
+          if (attackMove) return attackMove;
+        }
+
+        // 优先连接自己的棋子
+        const connectMove = this.findConnectMove(color, validMoves, board);
+        if (connectMove) return connectMove;
+
+        // 随机落子
+        return validMoves[Math.floor(Math.random() * validMoves.length)];
+      }
+
+      // 困难难度：完整策略
+      getHardMove(color, validMoves, board) {
+        // 优先提子
+        const captureMove = this.findCaptureMove(color, validMoves, board);
+        if (captureMove) return captureMove;
+
+        // 防守：救被叫吃的棋子
+        const defendMove = this.findDefendMove(color, validMoves, board);
+        if (defendMove) return defendMove;
+
+        // 进攻：叫吃对方棋子
+        const atariMove = this.findAtariMove(color, validMoves, board);
+        if (atariMove) return atariMove;
+
+        // 连接自己的棋子
+        const connectMove = this.findConnectMove(color, validMoves, board);
+        if (connectMove) return connectMove;
+
+        // 占据要点（角、边）
+        const strategicMove = this.findStrategicMove(color, validMoves, board);
+        if (strategicMove) return strategicMove;
+
+        // 随机落子
+        return validMoves[Math.floor(Math.random() * validMoves.length)];
+      }
+
+      // 寻找能提子的位置
+      findCaptureMove(color, validMoves, board) {
+        for (const pos of validMoves) {
+          const tempBoard = board.map(row => [...row]);
+          tempBoard[pos.y][pos.x] = color;
+          const opponent = color === StoneColor.Black ? StoneColor.White : StoneColor.Black;
+          
+          for (const neighbor of this.engine.getNeighbors(pos)) {
+            if (tempBoard[neighbor.y][neighbor.x] === opponent) {
+              const group = this.engine.getGroupOnBoard(tempBoard, neighbor);
+              if (group && group.liberties.length === 0) {
+                return pos;
+              }
+            }
+          }
+        }
+        return null;
+      }
+
+      // 寻找进攻位置（靠近对方棋子）
+      findAttackMove(color, validMoves, board) {
+        const opponent = color === StoneColor.Black ? StoneColor.White : StoneColor.Black;
+        const attackMoves = [];
+        
+        for (const pos of validMoves) {
+          const neighbors = this.engine.getNeighbors(pos);
+          const hasOpponent = neighbors.some(n => board[n.y][n.x] === opponent);
+          if (hasOpponent) {
+            attackMoves.push(pos);
+          }
+        }
+        
+        return attackMoves.length > 0 ? attackMoves[Math.floor(Math.random() * attackMoves.length)] : null;
+      }
+
+      // 寻找连接位置
+      findConnectMove(color, validMoves, board) {
+        const connectMoves = [];
+        
+        for (const pos of validMoves) {
+          const neighbors = this.engine.getNeighbors(pos);
+          const hasFriend = neighbors.some(n => board[n.y][n.x] === color);
+          if (hasFriend) {
+            connectMoves.push(pos);
+          }
+        }
+        
+        return connectMoves.length > 0 ? connectMoves[Math.floor(Math.random() * connectMoves.length)] : null;
+      }
+
+      // 寻找防守位置（救被叫吃的棋子）
+      findDefendMove(color, validMoves, board) {
+        const groups = this.engine.getAllStoneGroups();
+        
+        for (const group of groups) {
+          if (group.color === color && group.liberties.length === 1) {
+            // 这个棋块被叫吃，尝试救它
+            const liberty = group.liberties[0];
+            if (validMoves.some(m => m.x === liberty.x && m.y === liberty.y)) {
+              return liberty;
+            }
+          }
+        }
+        
+        return null;
+      }
+
+      // 寻找叫吃位置（让对方棋子只剩1气）
+      findAtariMove(color, validMoves, board) {
+        const opponent = color === StoneColor.Black ? StoneColor.White : StoneColor.Black;
+        
+        for (const pos of validMoves) {
+          const tempBoard = board.map(row => [...row]);
+          tempBoard[pos.y][pos.x] = color;
+          
+          // 检查是否能让对方棋块只剩1气
+          for (const neighbor of this.engine.getNeighbors(pos)) {
+            if (tempBoard[neighbor.y][neighbor.x] === opponent) {
+              const group = this.engine.getGroupOnBoard(tempBoard, neighbor);
+              if (group && group.liberties.length === 1) {
+                return pos;
+              }
+            }
+          }
+        }
+        
+        return null;
+      }
+
+      // 寻找战略要点（角、边）
+      findStrategicMove(color, validMoves, board) {
+        const boardSize = this.engine.boardSize;
+        const priorityPoints = [];
+        
+        // 星位（角部和边部要点）
+        const starPoints = [
+          { x: 3, y: 3 }, { x: 3, y: 9 }, { x: 3, y: 15 },
+          { x: 9, y: 3 }, { x: 9, y: 9 }, { x: 9, y: 15 },
+          { x: 15, y: 3 }, { x: 15, y: 9 }, { x: 15, y: 15 }
+        ];
+        
+        for (const point of starPoints) {
+          if (validMoves.some(m => m.x === point.x && m.y === point.y)) {
+            priorityPoints.push(point);
+          }
+        }
+        
+        if (priorityPoints.length > 0) {
+          return priorityPoints[Math.floor(Math.random() * priorityPoints.length)];
+        }
+        
+        // 如果没有星位可选，选择靠近边部的点
+        const edgeMoves = validMoves.filter(m => 
+          m.x <= 4 || m.x >= boardSize - 5 || m.y <= 4 || m.y >= boardSize - 5
+        );
+        
+        if (edgeMoves.length > 0) {
+          return edgeMoves[Math.floor(Math.random() * edgeMoves.length)];
+        }
+        
+        return null;
+      }
+    }
+
+    // 游戏模式管理器
+    class GameManager {
+      constructor(engine, renderer) {
+        this.engine = engine;
+        this.renderer = renderer;
+        this.ai = new GoAI(engine);
+        this.gameMode = 'pvp'; // 'pvp' 或 'pve'
+        this.playerColor = StoneColor.Black; // 玩家执黑或执白
+        this.isAIThinking = false;
+      }
+
+      setGameMode(mode) {
+        this.gameMode = mode;
+        this.engine.reset();
+        this.renderer.updateLibertyTargets();
+        this.renderer.updateUI();
+        
+        // 如果是人机模式且 AI 执黑，AI 先手
+        if (mode === 'pve' && this.playerColor === StoneColor.White) {
+          this.triggerAIMove();
+        }
+      }
+
+      setPlayerColor(color) {
+        this.playerColor = color;
+        this.engine.reset();
+        this.renderer.updateLibertyTargets();
+        this.renderer.updateUI();
+        
+        // 如果 AI 执黑，AI 先手
+        if (this.playerColor === StoneColor.White) {
+          this.triggerAIMove();
+        }
+      }
+
+      setAIDifficulty(difficulty) {
+        this.ai.setDifficulty(difficulty);
+      }
+
+      onPlayerMove() {
+        // 玩家落子后，如果是人机模式，触发 AI 落子
+        if (this.gameMode === 'pve' && !this.isAIThinking) {
+          this.triggerAIMove();
+        }
+      }
+
+      triggerAIMove() {
+        const currentPlayer = this.engine.getCurrentPlayer();
+        const aiColor = currentPlayer;
+        
+        // 检查是否是 AI 的回合
+        if (this.gameMode === 'pve' && aiColor !== this.playerColor) {
+          this.isAIThinking = true;
+          
+          // 延迟一下，让玩家看到 AI 的思考过程
+          setTimeout(() => {
+            const move = this.ai.getNextMove(aiColor);
+            if (move) {
+              this.engine.placeStone(move);
+              this.renderer.updateLibertyTargets();
+              this.renderer.updateUI();
+            }
+            this.isAIThinking = false;
+            
+            // 检查终局
+            if (this.engine.isGameOver()) {
+              setTimeout(() => {
+                alert('双方连续停手，游戏结束！');
+              }, 100);
+            }
+          }, 500);
+        }
+      }
+    }
+
     // 初始化游戏
     const engine = new GoEngine(19);
     const canvas = document.getElementById('board-canvas');
     const renderer = new GoRenderer(canvas, engine, 19);
+    const gameManager = new GameManager(engine, renderer);
 
     renderer.updateLibertyTargets();
+
+    // 游戏模式切换
+    document.querySelectorAll('[data-game-mode]').forEach(toggle => {
+      toggle.addEventListener('click', () => {
+        const mode = toggle.dataset.gameMode;
+        
+        // 更新 UI
+        document.querySelectorAll('[data-game-mode]').forEach(t => t.classList.remove('active'));
+        toggle.classList.add('active');
+        
+        // 显示/隐藏人机对弈选项
+        const pveOptions = document.getElementById('pve-options');
+        if (mode === 'pve') {
+          pveOptions.style.display = 'block';
+        } else {
+          pveOptions.style.display = 'none';
+        }
+        
+        // 设置游戏模式
+        gameManager.setGameMode(mode);
+      });
+    });
+
+    // 玩家颜色切换
+    document.querySelectorAll('[data-player-color]').forEach(toggle => {
+      toggle.addEventListener('click', () => {
+        const color = toggle.dataset.playerColor;
+        
+        // 更新 UI
+        document.querySelectorAll('[data-player-color]').forEach(t => t.classList.remove('active'));
+        toggle.classList.add('active');
+        
+        // 设置玩家颜色
+        gameManager.setPlayerColor(color === 'black' ? StoneColor.Black : StoneColor.White);
+      });
+    });
+
+    // AI 难度切换
+    document.querySelectorAll('[data-ai-difficulty]').forEach(toggle => {
+      toggle.addEventListener('click', () => {
+        const difficulty = toggle.dataset.aiDifficulty;
+        
+        // 更新 UI
+        document.querySelectorAll('[data-ai-difficulty]').forEach(t => t.classList.remove('active'));
+        toggle.classList.add('active');
+        
+        // 设置 AI 难度
+        gameManager.setAIDifficulty(difficulty);
+      });
+    });
+
+    // 监听玩家落子，触发 AI 落子
+    canvas.addEventListener('click', () => {
+      // 延迟一下，确保 engine 的状态已经更新
+      setTimeout(() => {
+        gameManager.onPlayerMove();
+      }, 100);
+    });
 
     // 可视化模式开关
     const viewOptions = {
@@ -1877,8 +2275,8 @@
       eyes: false
     };
 
-    // 初始化默认开启的选项
-    document.querySelectorAll('.toggle-switch').forEach(toggle => {
+    // 初始化默认开启的选项（只处理可视化模式开关）
+    document.querySelectorAll('[data-mode]').forEach(toggle => {
       const mode = toggle.dataset.mode;
       if (toggle.classList.contains('active')) {
         viewOptions[mode] = true;
@@ -1903,6 +2301,9 @@
         setTimeout(() => {
           alert('双方连续停手，游戏结束！');
         }, 100);
+      } else {
+        // 触发 AI 落子
+        gameManager.onPlayerMove();
       }
     });
 
@@ -1910,6 +2311,13 @@
       engine.undo();
       renderer.updateLibertyTargets();
       renderer.updateUI();
+      
+      // 如果是人机模式，可能需要再悔一步（悔掉 AI 的棋）
+      if (gameManager.gameMode === 'pve') {
+        engine.undo();
+        renderer.updateLibertyTargets();
+        renderer.updateUI();
+      }
     });
 
     document.getElementById('btn-restart')?.addEventListener('click', () => {
