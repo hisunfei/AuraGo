@@ -14,10 +14,11 @@
     body {
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
       background: #1a1a2e;
-      min-height: 100vh;
+      height: 100vh;
       display: flex;
-      padding: 20px;
-      gap: 20px;
+      padding: 10px;
+      gap: 10px;
+      overflow: hidden;
     }
 
     .board-section {
@@ -26,6 +27,17 @@
       justify-content: center;
       align-items: center;
       min-width: 0;
+      height: calc(100vh - 20px);
+      padding: 0;
+    }
+
+    .board-wrapper {
+      position: relative;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      width: 100%;
+      height: 100%;
     }
 
     .control-section {
@@ -35,7 +47,123 @@
       flex-direction: column;
       gap: 15px;
       overflow-y: auto;
-      max-height: 100vh;
+      height: calc(100vh - 20px);
+      position: relative;
+    }
+
+    /* 汉堡菜单按钮 - 右侧面板右上角 */
+    .menu-toggle {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      width: 36px;
+      height: 36px;
+      background: rgba(255, 255, 255, 0.9);
+      border: none;
+      border-radius: 6px;
+      font-size: 20px;
+      cursor: pointer;
+      z-index: 100;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+      transition: all 0.3s;
+    }
+
+    .menu-toggle:hover {
+      background: rgba(255, 255, 255, 1);
+      transform: scale(1.05);
+    }
+
+    /* 弹出菜单 */
+    .dropdown-menu {
+      position: absolute;
+      top: 55px;
+      right: 10px;
+      width: 300px;
+      max-height: calc(100vh - 100px);
+      background: white;
+      border-radius: 8px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+      z-index: 1000;
+      overflow-y: auto;
+      display: none;
+    }
+
+    .dropdown-menu.open {
+      display: block;
+    }
+
+    .menu-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 15px 20px;
+      background: #f8f9fa;
+      border-bottom: 1px solid #e0e0e0;
+      border-radius: 8px 8px 0 0;
+    }
+
+    .menu-header h2 {
+      margin: 0;
+      font-size: 18px;
+      color: #2c3e50;
+    }
+
+    .menu-close {
+      width: 32px;
+      height: 32px;
+      background: transparent;
+      border: none;
+      font-size: 28px;
+      cursor: pointer;
+      color: #666;
+      transition: color 0.3s;
+    }
+
+    .menu-close:hover {
+      color: #000;
+    }
+
+    .menu-content {
+      padding: 15px 20px;
+    }
+
+    .menu-section {
+      margin-bottom: 20px;
+    }
+
+    .menu-section h3 {
+      font-size: 14px;
+      color: #2c3e50;
+      margin-bottom: 10px;
+      padding-bottom: 5px;
+      border-bottom: 2px solid #3498db;
+    }
+
+    .rule-description {
+      margin-top: 10px;
+      padding: 10px;
+      background: #f8f9fa;
+      border-radius: 6px;
+      font-size: 12px;
+      color: #666;
+    }
+
+    .rule-description p {
+      margin: 3px 0;
+    }
+
+    .current-rule {
+      margin-top: 10px;
+      padding: 8px;
+      background: #e3f2fd;
+      border-radius: 6px;
+      text-align: center;
+      font-size: 12px;
+      color: #1976d2;
+    }
+
+    #current-rule-text {
+      font-weight: 600;
     }
 
     .control-panel {
@@ -265,40 +393,289 @@
       display: block;
     }
 
-    .hover-info {
+    /* 计时器样式 */
+    .timer-display {
       padding: 15px;
       background: #f8f9fa;
       border-radius: 6px;
-      font-size: 14px;
-      color: #555;
-      height: 120px;
+      margin-bottom: 12px;
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
     }
 
-    .hover-title {
-      font-weight: 600;
-      color: #2c3e50;
-      margin-bottom: 8px;
-    }
-
-    .hover-detail {
+    .timer-item {
+      flex: 1;
       display: flex;
       flex-direction: column;
+      align-items: center;
       gap: 4px;
     }
 
-    .hover-detail-item {
+    .timer-label {
+      font-size: 12px;
+      color: #666;
+    }
+
+    .timer-value {
+      font-size: 18px;
+      font-weight: 600;
+      color: #2c3e50;
+      font-family: 'Courier New', monospace;
+    }
+
+    /* 响应式布局 */
+    @media (max-width: 768px) {
+      body {
+        flex-direction: column;
+        padding: 10px;
+      }
+
+      .control-section {
+        width: 100%;
+        max-height: none;
+      }
+
+      .board-section {
+        width: 100%;
+      }
+    }
+
+    /* 主题样式 */
+    body.theme-light {
+      background: #f5f5f5;
+    }
+
+    body.theme-light .control-panel {
+      background: #fff;
+    }
+
+    body.theme-wood {
+      background: #8b6f47;
+    }
+
+    body.theme-wood .control-panel {
+      background: #f5e6d3;
+    }
+
+    /* AI 思考状态 */
+    .ai-thinking {
+      display: none;
+      padding: 10px;
+      background: #e3f2fd;
+      border-radius: 6px;
+      text-align: center;
+      color: #1976d2;
+      font-size: 14px;
+      margin-top: 10px;
+    }
+
+    .ai-thinking.active {
+      display: block;
+      animation: pulse 1.5s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.6; }
+    }
+
+    /* 叫吃警告动画 */
+    @keyframes atari-pulse {
+      0%, 100% { opacity: 0.8; }
+      50% { opacity: 0.3; }
+    }
+
+    /* 最后落子标记呼吸效果 */
+    @keyframes breathe {
+      0%, 100% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.2); opacity: 0.7; }
+    }
+
+    /* 胜利弹窗 */
+    .victory-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.7);
+      z-index: 1000;
+      justify-content: center;
+      align-items: center;
+      animation: fadeIn 0.3s ease-out;
+    }
+
+    .victory-overlay.active {
+      display: flex;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    .victory-modal {
+      background: white;
+      border-radius: 16px;
+      padding: 40px;
+      text-align: center;
+      box-shadow: 0 8px 40px rgba(0, 0, 0, 0.3);
+      animation: slideUp 0.4s ease-out;
+      max-width: 500px;
+    }
+
+    @keyframes slideUp {
+      from {
+        transform: translateY(50px);
+        opacity: 0;
+      }
+      to {
+        transform: translateY(0);
+        opacity: 1;
+      }
+    }
+
+    .victory-title {
+      font-size: 36px;
+      font-weight: 700;
+      margin-bottom: 20px;
+      color: #2c3e50;
+    }
+
+    .victory-title.black {
+      color: #000;
+    }
+
+    .victory-title.white {
+      color: #666;
+    }
+
+    .victory-score {
+      font-size: 24px;
+      margin-bottom: 30px;
+      color: #555;
+    }
+
+    .victory-details {
+      background: #f8f9fa;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 30px;
+      text-align: left;
+    }
+
+    .victory-details-item {
       display: flex;
       justify-content: space-between;
+      margin-bottom: 10px;
+      font-size: 16px;
     }
 
-    .hover-detail-item .danger {
-      color: #dc3545;
-      font-weight: 600;
+    .victory-details-item:last-child {
+      margin-bottom: 0;
     }
 
-    .hover-detail-item .warning {
-      color: #ffc107;
+    .victory-button {
+      background: #3498db;
+      color: white;
+      border: none;
+      padding: 12px 40px;
+      font-size: 18px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+
+    .victory-button:hover {
+      background: #2980b9;
+    }
+
+    /* 实时形势分析 */
+    .score-analysis {
+      padding: 15px;
+      background: #f8f9fa;
+      border-radius: 6px;
+      margin-bottom: 12px;
+    }
+
+    .score-bar {
+      height: 28px;
+      background: #e0e0e0;
+      border-radius: 14px;
+      overflow: hidden;
+      display: flex;
+      position: relative;
+      margin-bottom: 10px;
+      box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .score-bar-fill {
+      height: 100%;
+      transition: width 0.3s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
       font-weight: 600;
+      min-width: 40px;
+    }
+
+    .score-bar-fill.black {
+      background: linear-gradient(90deg, #333, #000);
+      color: white;
+      border-radius: 14px 0 0 14px;
+    }
+
+    .score-bar-fill.white {
+      background: linear-gradient(90deg, #fff, #f0f0f0);
+      color: #333;
+      border-radius: 0 14px 14px 0;
+      border-left: 2px solid #ccc;
+    }
+
+    .score-stats {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      font-size: 13px;
+    }
+
+    .score-stat {
+      display: flex;
+      justify-content: space-between;
+      padding: 5px 0;
+    }
+
+    .score-stat-label {
+      color: #666;
+    }
+
+    .score-stat-value {
+      font-weight: 600;
+      color: #2c3e50;
+    }
+
+    .score-advantage {
+      text-align: center;
+      margin-top: 10px;
+      padding: 8px;
+      background: #fff3cd;
+      border-radius: 4px;
+      font-size: 14px;
+      font-weight: 600;
+      color: #856404;
+    }
+
+    .score-advantage.black {
+      background: #d4edda;
+      color: #155724;
+    }
+
+    .score-advantage.white {
+      background: #cce5ff;
+      color: #004085;
     }
 
     #board-canvas {
@@ -320,12 +697,187 @@
     </div>
   </div>
 
+  <!-- 胜利弹窗 -->
+  <div id="victory-overlay" class="victory-overlay">
+    <div class="victory-modal">
+      <div id="victory-title" class="victory-title">游戏结束</div>
+      <div id="victory-score" class="victory-score"></div>
+      <div class="victory-details">
+        <div class="victory-details-item">
+          <span>黑方领地：</span>
+          <span id="victory-black-territory">0 目</span>
+        </div>
+        <div class="victory-details-item">
+          <span>白方领地：</span>
+          <span id="victory-white-territory">0 目</span>
+        </div>
+        <div class="victory-details-item">
+          <span>黑方活子：</span>
+          <span id="victory-black-stones">0 子</span>
+        </div>
+        <div class="victory-details-item">
+          <span>白方活子：</span>
+          <span id="victory-white-stones">0 子</span>
+        </div>
+        <div class="victory-details-item">
+          <span>贴目：</span>
+          <span>6.5 目</span>
+        </div>
+      </div>
+      <button class="victory-button" onclick="closeVictoryModal()">确定</button>
+    </div>
+  </div>
+
   <div class="control-section">
+    <!-- 汉堡菜单按钮 -->
+    <button id="menu-toggle" class="menu-toggle" title="设置">☰</button>
+    
+    <!-- 弹出菜单 -->
+    <div id="dropdown-menu" class="dropdown-menu">
+      <div class="menu-header">
+        <h2>设置</h2>
+        <button id="menu-close" class="menu-close">×</button>
+      </div>
+      <div class="menu-content">
+        <!-- 游戏模式 -->
+        <div class="menu-section">
+          <h3>游戏模式</h3>
+          <div class="toggle-group">
+            <div class="toggle-item">
+              <span class="toggle-label">人人对弈</span>
+              <div class="toggle-switch active" data-game-mode="pvp"></div>
+            </div>
+            <div class="toggle-item">
+              <span class="toggle-label">人机对弈</span>
+              <div class="toggle-switch" data-game-mode="pve"></div>
+            </div>
+          </div>
+          
+          <div id="pve-options" style="display: none; margin-top: 15px; padding-left: 20px; border-left: 2px solid #e0e0e0;">
+            <div class="toggle-group">
+              <div class="toggle-item">
+                <span class="toggle-label">玩家执黑</span>
+                <div class="toggle-switch active" data-player-color="black"></div>
+              </div>
+              <div class="toggle-item">
+                <span class="toggle-label">玩家执白</span>
+                <div class="toggle-switch" data-player-color="white"></div>
+              </div>
+              <div class="toggle-item">
+                <span class="toggle-label">AI 简单</span>
+                <div class="toggle-switch" data-ai-difficulty="easy"></div>
+              </div>
+              <div class="toggle-item">
+                <span class="toggle-label">AI 中等</span>
+                <div class="toggle-switch active" data-ai-difficulty="medium"></div>
+              </div>
+              <div class="toggle-item">
+                <span class="toggle-label">AI 困难</span>
+                <div class="toggle-switch" data-ai-difficulty="hard"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 棋盘设置 -->
+        <div class="menu-section">
+          <h3>棋盘设置</h3>
+          <div class="toggle-group">
+            <div class="toggle-item">
+              <span class="toggle-label">9路</span>
+              <div class="toggle-switch" data-board-size="9"></div>
+            </div>
+            <div class="toggle-item">
+              <span class="toggle-label">13路</span>
+              <div class="toggle-switch" data-board-size="13"></div>
+            </div>
+            <div class="toggle-item">
+              <span class="toggle-label">19路</span>
+              <div class="toggle-switch active" data-board-size="19"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 计分规则 -->
+        <div class="menu-section">
+          <h3>计分规则</h3>
+          <div class="toggle-group">
+            <div class="toggle-item">
+              <span class="toggle-label">中国规则（数子法）</span>
+              <div class="toggle-switch active" data-scoring-rule="chinese"></div>
+            </div>
+            <div class="toggle-item">
+              <span class="toggle-label">日本规则（数目法）</span>
+              <div class="toggle-switch" data-scoring-rule="japanese"></div>
+            </div>
+          </div>
+          <div class="rule-description">
+            <p><strong>中国规则：</strong>领地 + 活子</p>
+            <p><strong>日本规则：</strong>领地 + 提子</p>
+          </div>
+        </div>
+
+        <!-- 主题设置 -->
+        <div class="menu-section">
+          <h3>主题</h3>
+          <div class="toggle-group">
+            <div class="toggle-item">
+              <span class="toggle-label">暗色</span>
+              <div class="toggle-switch active" data-theme="dark"></div>
+            </div>
+            <div class="toggle-item">
+              <span class="toggle-label">亮色</span>
+              <div class="toggle-switch" data-theme="light"></div>
+            </div>
+            <div class="toggle-item">
+              <span class="toggle-label">木纹</span>
+              <div class="toggle-switch" data-theme="wood"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 可视化模式 -->
+        <div class="menu-section">
+          <h3>可视化模式</h3>
+          <div class="toggle-group">
+            <div class="toggle-item">
+              <span class="toggle-label">数字显示</span>
+              <div class="toggle-switch active" data-mode="number"></div>
+            </div>
+            <div class="toggle-item">
+              <span class="toggle-label">气的归属</span>
+              <div class="toggle-switch active" data-mode="qi"></div>
+            </div>
+            <div class="toggle-item">
+              <span class="toggle-label">领地范围</span>
+              <div class="toggle-switch" data-mode="territory"></div>
+            </div>
+            <div class="toggle-item">
+              <span class="toggle-label">眼位标记</span>
+              <div class="toggle-switch" data-mode="eyes"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- 游戏状态 -->
     <div class="info-box">
       <div class="current-player">
         <div class="player-indicator black"></div>
         <span id="current-player-text">黑方走棋</span>
+      </div>
+      
+      <!-- 计时器 -->
+      <div class="timer-display">
+        <div class="timer-item">
+          <span class="timer-label">黑方用时</span>
+          <span id="black-timer" class="timer-value">00:00</span>
+        </div>
+        <div class="timer-item">
+          <span class="timer-label">白方用时</span>
+          <span id="white-timer" class="timer-value">00:00</span>
+        </div>
       </div>
       
       <div class="captures">
@@ -345,71 +897,47 @@
       </div>
       
       <div id="game-status" class="game-status"></div>
-      
-      <div id="hover-info" class="hover-info">
-        <div class="hover-title">悬停查看棋块信息</div>
-      </div>
     </div>
 
-    <!-- 游戏模式 -->
+    <!-- 实时形势分析 -->
     <div class="control-panel">
-      <div class="panel-title">游戏模式</div>
-      <div class="toggle-group">
-        <div class="toggle-item">
-          <span class="toggle-label">人人对弈</span>
-          <div class="toggle-switch active" data-game-mode="pvp"></div>
+      <div class="panel-title">形势分析</div>
+      <div class="score-analysis">
+        <div class="score-bar">
+          <div id="score-bar-black" class="score-bar-fill black" style="width: 50%;">黑 50%</div>
+          <div id="score-bar-white" class="score-bar-fill white" style="width: 50%;">白 50%</div>
         </div>
-        <div class="toggle-item">
-          <span class="toggle-label">人机对弈</span>
-          <div class="toggle-switch" data-game-mode="pve"></div>
-        </div>
-      </div>
-      
-      <div id="pve-options" style="display: none; margin-top: 15px; padding-left: 20px; border-left: 2px solid #e0e0e0;">
-        <div class="toggle-group">
-          <div class="toggle-item">
-            <span class="toggle-label">玩家执黑</span>
-            <div class="toggle-switch active" data-player-color="black"></div>
+        <div class="score-stats">
+          <div class="score-stat">
+            <span class="score-stat-label">黑方领地：</span>
+            <span id="live-black-territory" class="score-stat-value">0</span>
           </div>
-          <div class="toggle-item">
-            <span class="toggle-label">玩家执白</span>
-            <div class="toggle-switch" data-player-color="white"></div>
+          <div class="score-stat">
+            <span class="score-stat-label">白方领地：</span>
+            <span id="live-white-territory" class="score-stat-value">0</span>
           </div>
-          <div class="toggle-item">
-            <span class="toggle-label">AI 简单</span>
-            <div class="toggle-switch" data-ai-difficulty="easy"></div>
+          <div class="score-stat">
+            <span class="score-stat-label">黑方活子：</span>
+            <span id="live-black-stones" class="score-stat-value">0</span>
           </div>
-          <div class="toggle-item">
-            <span class="toggle-label">AI 中等</span>
-            <div class="toggle-switch active" data-ai-difficulty="medium"></div>
+          <div class="score-stat">
+            <span class="score-stat-label">白方活子：</span>
+            <span id="live-white-stones" class="score-stat-value">0</span>
           </div>
-          <div class="toggle-item">
-            <span class="toggle-label">AI 困难</span>
-            <div class="toggle-switch" data-ai-difficulty="hard"></div>
+          <div class="score-stat">
+            <span class="score-stat-label">黑方总计：</span>
+            <span id="live-black-total" class="score-stat-value">0</span>
+          </div>
+          <div class="score-stat">
+            <span class="score-stat-label">白方总计：</span>
+            <span id="live-white-total" class="score-stat-value">6.5</span>
           </div>
         </div>
-      </div>
-    </div>
-
-    <!-- 可视化模式 -->
-    <div class="control-panel">
-      <div class="panel-title">可视化模式</div>
-      <div class="toggle-group">
-        <div class="toggle-item">
-          <span class="toggle-label">数字显示</span>
-          <div class="toggle-switch active" data-mode="number"></div>
+        <div id="live-advantage" class="score-advantage">
+          白方领先 6.5 目
         </div>
-        <div class="toggle-item">
-          <span class="toggle-label">气的归属</span>
-          <div class="toggle-switch active" data-mode="qi"></div>
-        </div>
-        <div class="toggle-item">
-          <span class="toggle-label">领地范围</span>
-          <div class="toggle-switch" data-mode="territory"></div>
-        </div>
-        <div class="toggle-item">
-          <span class="toggle-label">眼位标记</span>
-          <div class="toggle-switch" data-mode="eyes"></div>
+        <div class="current-rule">
+          当前规则：<span id="current-rule-text">中国规则（数子法）</span>
         </div>
       </div>
     </div>
@@ -421,6 +949,24 @@
         <button id="btn-pass" class="action-button">停一手</button>
         <button id="btn-undo" class="action-button">悔棋</button>
         <button id="btn-restart" class="action-button danger">重新开始</button>
+      </div>
+      <div class="button-group" style="margin-top: 10px;">
+        <button id="btn-replay" class="action-button">棋谱回放</button>
+        <button id="btn-score" class="action-button">形势判断</button>
+      </div>
+      <!-- 回放控制 -->
+      <div id="replay-controls" style="display: none; margin-top: 15px;">
+        <div class="button-group">
+          <button id="btn-replay-prev" class="action-button">◀ 上一步</button>
+          <button id="btn-replay-next" class="action-button">下一步 ▶</button>
+        </div>
+        <div style="text-align: center; margin-top: 10px; font-size: 14px; color: #666;">
+          <span id="replay-status">第 0 / 0 手</span>
+        </div>
+      </div>
+      <!-- AI 思考状态 -->
+      <div id="ai-thinking" class="ai-thinking">
+        🤔 AI 思考中...
       </div>
     </div>
 
@@ -570,6 +1116,11 @@
         this.koPosition = null;
         this.moveCount = 0;
         this.lastMove = null;
+        this.scoringRule = 'chinese'; // 'chinese' 或 'japanese'
+      }
+
+      setScoringRule(rule) {
+        this.scoringRule = rule;
       }
 
       createEmptyBoard() {
@@ -1010,6 +1561,59 @@
         return eyes;
       }
 
+      // 计算形势（领地+提子）
+      calculateScore() {
+        const territory = this.getTerritory();
+        let blackTerritory = 0;
+        let whiteTerritory = 0;
+
+        for (const point of territory) {
+          if (point.owner === StoneColor.Black) {
+            blackTerritory++;
+          } else if (point.owner === StoneColor.White) {
+            whiteTerritory++;
+          }
+        }
+
+        // 计算棋盘上的活子数
+        let blackStones = 0;
+        let whiteStones = 0;
+        for (let y = 0; y < this.boardSize; y++) {
+          for (let x = 0; x < this.boardSize; x++) {
+            if (this.board[y][x] === StoneColor.Black) {
+              blackStones++;
+            } else if (this.board[y][x] === StoneColor.White) {
+              whiteStones++;
+            }
+          }
+        }
+
+        // 根据规则计算总分
+        // 游戏刚开始时（moveCount === 0）不计算贴目，避免显示"白方领先 6.5 目"的困惑
+        let blackTotal, whiteTotal;
+        const applyKomi = this.moveCount > 0; // 只有游戏开始后才计算贴目
+        
+        if (this.scoringRule === 'chinese') {
+          // 中国规则（数子法）：领地 + 活子
+          blackTotal = blackTerritory + blackStones;
+          whiteTotal = whiteTerritory + whiteStones + (applyKomi ? 6.5 : 0);
+        } else {
+          // 日本规则（数目法）：领地 + 提子
+          blackTotal = blackTerritory + this.captures.black;
+          whiteTotal = whiteTerritory + this.captures.white + (applyKomi ? 6.5 : 0);
+        }
+
+        return {
+          blackTerritory,
+          whiteTerritory,
+          blackStones,
+          whiteStones,
+          blackTotal,
+          whiteTotal,
+          rule: this.scoringRule
+        };
+      }
+
       // 检查是否有棋块处于叫吃状态
       getAtariGroups() {
         const groups = this.getAllStoneGroups();
@@ -1141,21 +1745,44 @@
         this.libertyAlphas = new Map(); // 气格 alpha 动画状态
         this.stoneScales = new Map(); // 棋子缩放动画
         this.capturingStones = []; // 正在被提走的棋子
+        
+        // v3.0 新增动画系统
+        this.flashEffect = null; // 闪白效果
+        this.particles = []; // 粒子系统
+        this.libertyNumberAnimations = new Map(); // 气数变化动画
         this.time = 0;
 
-        const maxSize = Math.min(window.innerWidth - 400, window.innerHeight - 100, 800);
-        const cellSize = Math.floor(maxSize / (boardSize + 1));
-        
+        // 初始化 config
         this.config = {
           boardSize,
-          cellSize,
-          padding: cellSize,
-          stoneRadius: cellSize * 0.45
+          cellSize: 0,
+          padding: 0,
+          stoneRadius: 0
         };
 
-        const canvasSize = cellSize * (boardSize - 1) + this.config.padding * 2;
-        this.canvas.width = canvasSize;
-        this.canvas.height = canvasSize;
+        // 动态计算棋盘大小，让它占满左侧空间
+        const updateBoardSize = () => {
+          const boardSection = document.querySelector('.board-section');
+          const availableWidth = boardSection.clientWidth - 40;
+          const availableHeight = boardSection.clientHeight - 40;
+          const maxSize = Math.min(availableWidth, availableHeight, 1200);
+          
+          const cellSize = Math.floor(maxSize / (this.config.boardSize + 1));
+          this.config.cellSize = cellSize;
+          this.config.padding = cellSize;
+          this.config.stoneRadius = cellSize * 0.45;
+          
+          const canvasSize = cellSize * (this.config.boardSize - 1) + this.config.padding * 2;
+          this.canvas.width = canvasSize;
+          this.canvas.height = canvasSize;
+        };
+        
+        updateBoardSize();
+        
+        // 监听窗口大小变化
+        window.addEventListener('resize', () => {
+          updateBoardSize();
+        });
 
         this.setupEventListeners();
         this.startAnimationLoop();
@@ -1173,6 +1800,36 @@
               state.current += diff * 0.15;
             } else {
               state.current = state.target;
+            }
+          }
+
+          // 更新闪白效果
+          if (this.flashEffect) {
+            const elapsed = now - this.flashEffect.startTime;
+            if (elapsed > this.flashEffect.duration) {
+              this.flashEffect = null;
+            }
+          }
+
+          // 更新粒子
+          this.particles = this.particles.filter(p => {
+            const elapsed = now - p.startTime;
+            if (elapsed > p.duration) return false;
+            
+            const progress = elapsed / p.duration;
+            p.x += p.vx;
+            p.y += p.vy;
+            p.vy += 0.2; // 重力
+            p.alpha = 1 - progress;
+            p.scale = 1 - progress * 0.5;
+            return true;
+          });
+
+          // 更新气数动画
+          for (const [key, anim] of this.libertyNumberAnimations) {
+            const elapsed = now - anim.startTime;
+            if (elapsed > anim.duration) {
+              this.libertyNumberAnimations.delete(key);
             }
           }
 
@@ -1210,65 +1867,14 @@
         if (pos) {
           const group = this.engine.getStoneGroup(pos);
           this.hoveredGroup = group;
-          this.updateHoverInfo(group, pos);
         } else {
           this.hoveredGroup = null;
-          this.updateHoverInfo(null, null);
         }
       }
 
       handleMouseLeave() {
         this.hoverPosition = null;
         this.hoveredGroup = null;
-        this.updateHoverInfo(null, null);
-      }
-
-      updateHoverInfo(group, pos) {
-        const hoverInfo = document.getElementById('hover-info');
-        if (!hoverInfo) return;
-
-        // 生成当前内容
-        let newContent = '';
-        if (!group) {
-          newContent = '<div class="hover-title">悬停查看棋块信息</div>';
-        } else {
-          const colorName = group.color === StoneColor.Black ? '黑方' : '白方';
-          const libertyCount = group.liberties.length;
-          const stoneCount = group.stones.length;
-          
-          let statusText = '安全';
-          let statusClass = '';
-          if (libertyCount === 1) {
-            statusText = '叫吃！';
-            statusClass = 'danger';
-          } else if (libertyCount === 2) {
-            statusText = '危险';
-            statusClass = 'warning';
-          }
-
-          newContent = `
-            <div class="hover-title">${colorName}棋块</div>
-            <div class="hover-detail">
-              <div class="hover-detail-item">
-                <span>棋子数：</span>
-                <span>${stoneCount}</span>
-              </div>
-              <div class="hover-detail-item">
-                <span>气数：</span>
-                <span>${libertyCount}</span>
-              </div>
-              <div class="hover-detail-item">
-                <span>状态：</span>
-                <span class="${statusClass}">${statusText}</span>
-              </div>
-            </div>
-          `;
-        }
-
-        // 只在内容变化时更新 DOM
-        if (hoverInfo.innerHTML !== newContent) {
-          hoverInfo.innerHTML = newContent;
-        }
       }
 
       handleClick(e) {
@@ -1288,6 +1894,11 @@
         const result = this.engine.placeStone(pos);
         
         if (result.success) {
+          // 记录棋谱
+          if (typeof moveHistory !== 'undefined') {
+            moveHistory.recordMove(pos, currentPlayer);
+          }
+          
           // 根据情况播放不同音效
           if (result.capturedStones.length > 0) {
             this.sound.playCapture();
@@ -1302,16 +1913,38 @@
             startTime: performance.now()
           });
 
-          // 提子动画
+          // 提子动画（调整顺序：先闪白+粒子，再消失）
           if (result.capturedStones.length > 0) {
-            for (const stone of result.capturedStones) {
-              this.capturingStones.push({
-                pos: stone,
-                color: currentPlayer === StoneColor.Black ? StoneColor.White : StoneColor.Black,
+            // 1. 立即触发闪白效果（3颗以上）
+            if (result.capturedStones.length >= 3) {
+              this.flashEffect = {
                 startTime: performance.now(),
-                duration: 500
-              });
+                duration: 300,
+                intensity: Math.min(result.capturedStones.length / 10, 1)
+              };
             }
+
+            // 2. 立即触发粒子效果
+            for (const stone of result.capturedStones) {
+              this.createCaptureParticles(stone, currentPlayer === StoneColor.Black ? StoneColor.White : StoneColor.Black);
+            }
+
+            // 3. 延迟后棋子消失动画
+            setTimeout(() => {
+              for (const stone of result.capturedStones) {
+                this.capturingStones.push({
+                  pos: stone,
+                  color: currentPlayer === StoneColor.Black ? StoneColor.White : StoneColor.Black,
+                  startTime: performance.now(),
+                  duration: 500
+                });
+              }
+            }, 200);
+
+            // 4. 气数变化动画（等棋子消失后）
+            setTimeout(() => {
+              this.createLibertyNumberAnimation(pos, currentPlayer);
+            }, 500);
           }
 
           // 更新气格 alpha 目标
@@ -1327,7 +1960,7 @@
           // 检查终局
           if (this.engine.isGameOver()) {
             setTimeout(() => {
-              alert('双方连续停手，游戏结束！');
+              showVictoryModal();
             }, 100);
           }
         }
@@ -1347,6 +1980,49 @@
         }
 
         this.libertyAlphas = newTargets;
+      }
+
+      // 创建提子粒子效果
+      createCaptureParticles(pos, color) {
+        const { cellSize, padding } = this.config;
+        const px = padding + pos.x * cellSize;
+        const py = padding + pos.y * cellSize;
+        
+        const particleCount = 12;
+        for (let i = 0; i < particleCount; i++) {
+          const angle = (Math.PI * 2 * i) / particleCount + Math.random() * 0.5;
+          const speed = 2 + Math.random() * 3;
+          
+          this.particles.push({
+            x: px,
+            y: py,
+            vx: Math.cos(angle) * speed,
+            vy: Math.sin(angle) * speed - 2,
+            color: color === StoneColor.Black ? '#000' : '#fff',
+            alpha: 1,
+            scale: 1,
+            size: 3 + Math.random() * 3,
+            startTime: performance.now(),
+            duration: 600 + Math.random() * 200
+          });
+        }
+      }
+
+      // 创建气数变化动画
+      createLibertyNumberAnimation(pos, color) {
+        const affectedGroups = this.engine.getAffectedGroupsAfterMove(pos, color);
+        
+        for (const group of affectedGroups) {
+          for (const stone of group.stones) {
+            const key = `${stone.x},${stone.y}`;
+            this.libertyNumberAnimations.set(key, {
+              fromValue: 0, // 从0开始（表示从无到有）
+              toValue: group.libertyCount,
+              startTime: performance.now(),
+              duration: 400
+            });
+          }
+        }
       }
 
       setViewOptions(options) {
@@ -1378,6 +2054,83 @@
 
         // 更新游戏状态提示
         this.updateGameStatus();
+        
+        // 更新实时形势分析
+        this.updateLiveScore();
+      }
+      
+      updateLiveScore() {
+        const score = this.engine.calculateScore();
+        
+        // 更新数字
+        const liveBlackTerritory = document.getElementById('live-black-territory');
+        const liveWhiteTerritory = document.getElementById('live-white-territory');
+        const liveBlackStones = document.getElementById('live-black-stones');
+        const liveWhiteStones = document.getElementById('live-white-stones');
+        const liveBlackTotal = document.getElementById('live-black-total');
+        const liveWhiteTotal = document.getElementById('live-white-total');
+        
+        if (liveBlackTerritory) liveBlackTerritory.textContent = score.blackTerritory;
+        if (liveWhiteTerritory) liveWhiteTerritory.textContent = score.whiteTerritory;
+        
+        // 根据规则显示不同的标签
+        if (this.engine.scoringRule === 'chinese') {
+          if (liveBlackStones) {
+            liveBlackStones.parentElement.querySelector('.score-stat-label').textContent = '黑方活子：';
+            liveBlackStones.textContent = score.blackStones;
+          }
+          if (liveWhiteStones) {
+            liveWhiteStones.parentElement.querySelector('.score-stat-label').textContent = '白方活子：';
+            liveWhiteStones.textContent = score.whiteStones;
+          }
+        } else {
+          if (liveBlackStones) {
+            liveBlackStones.parentElement.querySelector('.score-stat-label').textContent = '黑方提子：';
+            liveBlackStones.textContent = this.engine.captures.black;
+          }
+          if (liveWhiteStones) {
+            liveWhiteStones.parentElement.querySelector('.score-stat-label').textContent = '白方提子：';
+            liveWhiteStones.textContent = this.engine.captures.white;
+          }
+        }
+        
+        if (liveBlackTotal) liveBlackTotal.textContent = score.blackTotal.toFixed(1);
+        if (liveWhiteTotal) liveWhiteTotal.textContent = score.whiteTotal.toFixed(1);
+        
+        // 更新形势条（双色对比）
+        const total = score.blackTotal + score.whiteTotal;
+        const blackPercent = total > 0 ? (score.blackTotal / total) * 100 : 50;
+        const whitePercent = 100 - blackPercent;
+        
+        const blackBar = document.getElementById('score-bar-black');
+        const whiteBar = document.getElementById('score-bar-white');
+        
+        if (blackBar) {
+          blackBar.style.width = `${blackPercent}%`;
+          blackBar.textContent = `黑 ${blackPercent.toFixed(0)}%`;
+        }
+        
+        if (whiteBar) {
+          whiteBar.style.width = `${whitePercent}%`;
+          whiteBar.textContent = `白 ${whitePercent.toFixed(0)}%`;
+        }
+        
+        // 更新优势提示
+        const advantageEl = document.getElementById('live-advantage');
+        if (advantageEl) {
+          const diff = score.blackTotal - score.whiteTotal;
+          
+          if (diff > 0) {
+            advantageEl.textContent = `黑方领先 ${diff.toFixed(1)} 目`;
+            advantageEl.className = 'score-advantage black';
+          } else if (diff < 0) {
+            advantageEl.textContent = `白方领先 ${(-diff).toFixed(1)} 目`;
+            advantageEl.className = 'score-advantage white';
+          } else {
+            advantageEl.textContent = '双方持平';
+            advantageEl.className = 'score-advantage';
+          }
+        }
       }
 
       updateGameStatus() {
@@ -1421,18 +2174,39 @@
         }
         
         this.drawCapturingStones();
+        this.drawParticles();
         this.drawLastMoveMarker();
         this.drawKoMarker();
         this.drawHover();
+        
+        // 绘制闪白效果（最上层）
+        if (this.flashEffect) {
+          this.drawFlashEffect();
+        }
       }
 
       drawBoard() {
         const { cellSize, boardSize, padding } = this.config;
         const ctx = this.ctx;
 
-        // 木纹背景
-        ctx.fillStyle = '#dcb35c';
+        // 木纹背景（带纹理效果）
+        const baseColor = '#dcb35c';
+        ctx.fillStyle = baseColor;
         ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+
+        // 添加木纹纹理
+        ctx.save();
+        ctx.globalAlpha = 0.1;
+        for (let i = 0; i < 20; i++) {
+          const y = (this.canvas.height / 20) * i;
+          const gradient = ctx.createLinearGradient(0, y, 0, y + this.canvas.height / 20);
+          gradient.addColorStop(0, 'rgba(139, 90, 43, 0.3)');
+          gradient.addColorStop(0.5, 'rgba(160, 110, 60, 0.1)');
+          gradient.addColorStop(1, 'rgba(139, 90, 43, 0.3)');
+          ctx.fillStyle = gradient;
+          ctx.fillRect(0, y, this.canvas.width, this.canvas.height / 20);
+        }
+        ctx.restore();
 
         // 网格线
         ctx.strokeStyle = '#000';
@@ -1648,9 +2422,26 @@
             const px = padding + x * cellSize;
             const py = padding + y * cellSize;
 
+            // 检查是否有气数变化动画
+            const anim = this.libertyNumberAnimations.get(key);
+            let displayValue = group.liberties.length;
+            let animAlpha = 1;
+
+            if (anim) {
+              const elapsed = performance.now() - anim.startTime;
+              const progress = Math.min(elapsed / anim.duration, 1);
+              // 使用 ease-out 曲线
+              const eased = 1 - Math.pow(1 - progress, 3);
+              displayValue = Math.round(anim.fromValue + (anim.toValue - anim.fromValue) * eased);
+              // 动画结束时淡出
+              if (progress > 0.8) {
+                animAlpha = 1 - (progress - 0.8) / 0.2;
+              }
+            }
+
             // 数字看起来刻在棋子上（半透明 + 轻微阴影）
             ctx.save();
-            ctx.globalAlpha = 0.8;
+            ctx.globalAlpha = 0.8 * animAlpha;
             
             // 根据棋子颜色选择数字颜色
             const textColor = group.color === StoneColor.Black ? '#fff' : '#000';
@@ -1665,7 +2456,7 @@
             ctx.font = `bold ${cellSize * 0.45}px sans-serif`;
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
-            ctx.fillText(group.liberties.length.toString(), px, py);
+            ctx.fillText(displayValue.toString(), px, py);
             
             ctx.restore();
           }
@@ -1675,6 +2466,15 @@
       drawStones() {
         const board = this.engine.getBoard();
         const { cellSize, padding } = this.config;
+        
+        // 获取被叫吃的棋块
+        const atariGroups = this.engine.getAtariGroups();
+        const atariStones = new Set();
+        for (const group of atariGroups) {
+          for (const stone of group.stones) {
+            atariStones.add(`${stone.x},${stone.y}`);
+          }
+        }
 
         for (let y = 0; y < this.config.boardSize; y++) {
           for (let x = 0; x < this.config.boardSize; x++) {
@@ -1698,6 +2498,21 @@
             }
 
             this.drawStone(px, py, color, scale);
+            
+            // 叫吃警告（红色脉冲光晕）
+            if (atariStones.has(key)) {
+              const pulse = Math.sin(this.time / 200) * 0.3 + 0.5;
+              const ctx = this.ctx;
+              const radius = this.config.stoneRadius * scale;
+              
+              ctx.save();
+              ctx.strokeStyle = `rgba(255, 0, 0, ${pulse})`;
+              ctx.lineWidth = 3;
+              ctx.beginPath();
+              ctx.arc(px, py, radius + 2, 0, Math.PI * 2);
+              ctx.stroke();
+              ctx.restore();
+            }
           }
         }
       }
@@ -1712,14 +2527,16 @@
         ctx.arc(x + 2, y + 2, radius, 0, Math.PI * 2);
         ctx.fill();
 
-        // 棋子
+        // 棋子主体（径向渐变）
         const gradient = ctx.createRadialGradient(x - radius / 3, y - radius / 3, 0, x, y, radius);
         
         if (color === StoneColor.Black) {
-          gradient.addColorStop(0, '#555');
+          gradient.addColorStop(0, '#666');
+          gradient.addColorStop(0.5, '#333');
           gradient.addColorStop(1, '#000');
         } else {
           gradient.addColorStop(0, '#fff');
+          gradient.addColorStop(0.5, '#f5f5f5');
           gradient.addColorStop(1, '#ccc');
         }
 
@@ -1728,8 +2545,21 @@
         ctx.arc(x, y, radius, 0, Math.PI * 2);
         ctx.fill();
 
+        // 高光效果（增强立体感）
+        const highlightGradient = ctx.createRadialGradient(x - radius / 2, y - radius / 2, 0, x - radius / 2, y - radius / 2, radius / 2);
+        highlightGradient.addColorStop(0, color === StoneColor.Black ? 'rgba(255, 255, 255, 0.3)' : 'rgba(255, 255, 255, 0.8)');
+        highlightGradient.addColorStop(1, 'rgba(255, 255, 255, 0)');
+        
+        ctx.fillStyle = highlightGradient;
+        ctx.beginPath();
+        ctx.arc(x - radius / 2, y - radius / 2, radius / 2, 0, Math.PI * 2);
+        ctx.fill();
+
+        // 边缘
         ctx.strokeStyle = color === StoneColor.Black ? '#000' : '#999';
         ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.arc(x, y, radius, 0, Math.PI * 2);
         ctx.stroke();
       }
 
@@ -1765,10 +2595,22 @@
         const px = padding + lastMove.x * cellSize;
         const py = padding + lastMove.y * cellSize;
 
-        ctx.fillStyle = 'rgba(255, 0, 0, 0.6)';
+        // 呼吸效果
+        const breathe = Math.sin(this.time / 500) * 0.3 + 0.7;
+        const radius = 4 * breathe;
+        const alpha = 0.6 * breathe;
+
+        ctx.fillStyle = `rgba(255, 0, 0, ${alpha})`;
         ctx.beginPath();
-        ctx.arc(px, py, 4, 0, Math.PI * 2);
+        ctx.arc(px, py, radius, 0, Math.PI * 2);
         ctx.fill();
+
+        // 外圈光晕
+        ctx.strokeStyle = `rgba(255, 0, 0, ${alpha * 0.5})`;
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.arc(px, py, radius + 2, 0, Math.PI * 2);
+        ctx.stroke();
       }
 
       drawHover() {
@@ -1899,6 +2741,38 @@
         ctx.lineTo(arrowX, arrowY + 5);
         ctx.closePath();
         ctx.fill();
+      }
+
+      // 绘制闪白效果
+      drawFlashEffect() {
+        if (!this.flashEffect) return;
+
+        const ctx = this.ctx;
+        const elapsed = performance.now() - this.flashEffect.startTime;
+        const progress = elapsed / this.flashEffect.duration;
+        
+        // 使用 ease-out 曲线
+        const alpha = this.flashEffect.intensity * (1 - progress) * 0.6;
+        
+        ctx.save();
+        ctx.fillStyle = `rgba(255, 255, 255, ${alpha})`;
+        ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+        ctx.restore();
+      }
+
+      // 绘制粒子效果
+      drawParticles() {
+        const ctx = this.ctx;
+        
+        for (const particle of this.particles) {
+          ctx.save();
+          ctx.globalAlpha = particle.alpha;
+          ctx.fillStyle = particle.color;
+          ctx.beginPath();
+          ctx.arc(particle.x, particle.y, particle.size * particle.scale, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.restore();
+        }
       }
     }
 
@@ -2180,6 +3054,16 @@
         if (this.gameMode === 'pve' && aiColor !== this.playerColor) {
           this.isAIThinking = true;
           
+          // 显示 AI 思考状态
+          const aiThinking = document.getElementById('ai-thinking');
+          if (aiThinking) {
+            aiThinking.classList.add('active');
+          }
+          
+          // 根据难度设置不同的思考时间
+          const thinkTime = this.ai.difficulty === 'easy' ? 300 : 
+                           this.ai.difficulty === 'medium' ? 800 : 1500;
+          
           // 延迟一下，让玩家看到 AI 的思考过程
           setTimeout(() => {
             const move = this.ai.getNextMove(aiColor);
@@ -2190,13 +3074,18 @@
             }
             this.isAIThinking = false;
             
+            // 隐藏 AI 思考状态
+            if (aiThinking) {
+              aiThinking.classList.remove('active');
+            }
+            
             // 检查终局
             if (this.engine.isGameOver()) {
               setTimeout(() => {
-                alert('双方连续停手，游戏结束！');
+                showVictoryModal();
               }, 100);
             }
-          }, 500);
+          }, thinkTime);
         }
       }
     }
@@ -2208,6 +3097,60 @@
     const gameManager = new GameManager(engine, renderer);
 
     renderer.updateLibertyTargets();
+
+    // 显示胜利弹窗
+    function showVictoryModal() {
+      const score = engine.calculateScore();
+      
+      // 设置标题
+      const titleEl = document.getElementById('victory-title');
+      if (score.blackTotal > score.whiteTotal) {
+        titleEl.textContent = '🎉 黑方胜！';
+        titleEl.className = 'victory-title black';
+      } else if (score.whiteTotal > score.blackTotal) {
+        titleEl.textContent = '🎉 白方胜！';
+        titleEl.className = 'victory-title white';
+      } else {
+        titleEl.textContent = '🤝 和棋！';
+        titleEl.className = 'victory-title';
+      }
+      
+      // 设置比分
+      const scoreEl = document.getElementById('victory-score');
+      const diff = Math.abs(score.blackTotal - score.whiteTotal);
+      if (score.blackTotal > score.whiteTotal) {
+        scoreEl.textContent = `黑方胜 ${diff.toFixed(1)} 目`;
+      } else if (score.whiteTotal > score.blackTotal) {
+        scoreEl.textContent = `白方胜 ${diff.toFixed(1)} 目`;
+      } else {
+        scoreEl.textContent = '双方持平';
+      }
+      
+      // 设置详细信息
+      document.getElementById('victory-black-territory').textContent = `${score.blackTerritory} 目`;
+      document.getElementById('victory-white-territory').textContent = `${score.whiteTerritory} 目`;
+      
+      // 根据规则显示不同的信息
+      if (engine.scoringRule === 'chinese') {
+        document.getElementById('victory-black-stones').parentElement.querySelector('span:first-child').textContent = '黑方活子：';
+        document.getElementById('victory-black-stones').textContent = `${score.blackStones} 子`;
+        document.getElementById('victory-white-stones').parentElement.querySelector('span:first-child').textContent = '白方活子：';
+        document.getElementById('victory-white-stones').textContent = `${score.whiteStones} 子`;
+      } else {
+        document.getElementById('victory-black-stones').parentElement.querySelector('span:first-child').textContent = '黑方提子：';
+        document.getElementById('victory-black-stones').textContent = `${engine.captures.black} 子`;
+        document.getElementById('victory-white-stones').parentElement.querySelector('span:first-child').textContent = '白方提子：';
+        document.getElementById('victory-white-stones').textContent = `${engine.captures.white} 子`;
+      }
+      
+      // 显示弹窗
+      document.getElementById('victory-overlay').classList.add('active');
+    }
+
+    // 关闭胜利弹窗
+    function closeVictoryModal() {
+      document.getElementById('victory-overlay').classList.remove('active');
+    }
 
     // 游戏模式切换
     document.querySelectorAll('[data-game-mode]').forEach(toggle => {
@@ -2299,7 +3242,7 @@
       // 检查终局
       if (engine.isGameOver()) {
         setTimeout(() => {
-          alert('双方连续停手，游戏结束！');
+          showVictoryModal();
         }, 100);
       } else {
         // 触发 AI 落子
@@ -2311,12 +3254,14 @@
       engine.undo();
       renderer.updateLibertyTargets();
       renderer.updateUI();
+      updateLiveScore();
       
       // 如果是人机模式，可能需要再悔一步（悔掉 AI 的棋）
       if (gameManager.gameMode === 'pve') {
         engine.undo();
         renderer.updateLibertyTargets();
         renderer.updateUI();
+        updateLiveScore();
       }
     });
 
@@ -2325,12 +3270,265 @@
         engine.reset();
         renderer.updateLibertyTargets();
         renderer.updateUI();
+        timerManager.reset();
+        moveHistory.clear();
+        updateLiveScore();
       }
+    });
+
+    // 棋盘大小切换
+    document.querySelectorAll('[data-board-size]').forEach(toggle => {
+      toggle.addEventListener('click', () => {
+        const size = parseInt(toggle.dataset.boardSize);
+        
+        // 更新 UI
+        document.querySelectorAll('[data-board-size]').forEach(t => t.classList.remove('active'));
+        toggle.classList.add('active');
+        
+        // 重新创建引擎和渲染器
+        if (confirm(`切换到 ${size} 路棋盘？当前棋局将丢失。`)) {
+          window.location.reload();
+        }
+      });
+    });
+
+    // 主题切换
+    document.querySelectorAll('[data-theme]').forEach(toggle => {
+      toggle.addEventListener('click', () => {
+        const theme = toggle.dataset.theme;
+        
+        // 更新 UI
+        document.querySelectorAll('[data-theme]').forEach(t => t.classList.remove('active'));
+        toggle.classList.add('active');
+        
+        // 应用主题
+        document.body.className = `theme-${theme}`;
+      });
+    });
+
+    // 棋谱回放
+    document.getElementById('btn-replay')?.addEventListener('click', () => {
+      const controls = document.getElementById('replay-controls');
+      controls.style.display = controls.style.display === 'none' ? 'block' : 'none';
+      updateReplayStatus();
+    });
+
+    document.getElementById('btn-replay-prev')?.addEventListener('click', () => {
+      if (moveHistory.canGoBack()) {
+        moveHistory.goBack();
+        renderer.updateLibertyTargets();
+        renderer.updateUI();
+        updateReplayStatus();
+      }
+    });
+
+    document.getElementById('btn-replay-next')?.addEventListener('click', () => {
+      if (moveHistory.canGoForward()) {
+        moveHistory.goForward();
+        renderer.updateLibertyTargets();
+        renderer.updateUI();
+        updateReplayStatus();
+      }
+    });
+
+    function updateReplayStatus() {
+      const status = document.getElementById('replay-status');
+      if (status) {
+        status.textContent = `第 ${moveHistory.currentIndex} / ${moveHistory.history.length} 手`;
+      }
+    }
+
+    // 形势判断
+    document.getElementById('btn-score')?.addEventListener('click', () => {
+      const score = engine.calculateScore();
+      
+      let message = `形势判断\n`;
+      if (engine.scoringRule === 'chinese') {
+        message += `（中国规则 - 数子法）\n\n`;
+        message += `黑方领地：${score.blackTerritory} 目\n`;
+        message += `黑方活子：${score.blackStones} 子\n`;
+        message += `黑方总计：${score.blackTotal.toFixed(1)} 目\n\n`;
+        message += `白方领地：${score.whiteTerritory} 目\n`;
+        message += `白方活子：${score.whiteStones} 子\n`;
+        message += `白方总计：${score.whiteTotal.toFixed(1)} 目（含贴目 6.5）\n\n`;
+      } else {
+        message += `（日本规则 - 数目法）\n\n`;
+        message += `黑方领地：${score.blackTerritory} 目\n`;
+        message += `黑方提子：${engine.captures.black} 子\n`;
+        message += `黑方总计：${score.blackTotal.toFixed(1)} 目\n\n`;
+        message += `白方领地：${score.whiteTerritory} 目\n`;
+        message += `白方提子：${engine.captures.white} 子\n`;
+        message += `白方总计：${score.whiteTotal.toFixed(1)} 目（含贴目 6.5）\n\n`;
+      }
+      
+      const diff = score.blackTotal - score.whiteTotal;
+      if (diff > 0) {
+        message += `黑方领先 ${diff.toFixed(1)} 目`;
+      } else if (diff < 0) {
+        message += `白方领先 ${(-diff).toFixed(1)} 目`;
+      } else {
+        message += `双方持平`;
+      }
+      
+      alert(message);
+    });
+
+    // 计时器管理
+    const timerManager = {
+      blackTime: 0,
+      whiteTime: 0,
+      lastUpdate: Date.now(),
+      interval: null,
+
+      start() {
+        if (this.interval) return;
+        this.lastUpdate = Date.now();
+        this.interval = setInterval(() => this.update(), 1000);
+      },
+
+      stop() {
+        if (this.interval) {
+          clearInterval(this.interval);
+          this.interval = null;
+        }
+      },
+
+      update() {
+        const now = Date.now();
+        const delta = (now - this.lastUpdate) / 1000;
+        this.lastUpdate = now;
+
+        const currentPlayer = engine.getCurrentPlayer();
+        if (currentPlayer === StoneColor.Black) {
+          this.blackTime += delta;
+        } else {
+          this.whiteTime += delta;
+        }
+
+        this.updateDisplay();
+      },
+
+      updateDisplay() {
+        const formatTime = (seconds) => {
+          const mins = Math.floor(seconds / 60);
+          const secs = Math.floor(seconds % 60);
+          return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+        };
+
+        const blackTimer = document.getElementById('black-timer');
+        const whiteTimer = document.getElementById('white-timer');
+        
+        if (blackTimer) blackTimer.textContent = formatTime(this.blackTime);
+        if (whiteTimer) whiteTimer.textContent = formatTime(this.whiteTime);
+      },
+
+      reset() {
+        this.blackTime = 0;
+        this.whiteTime = 0;
+        this.lastUpdate = Date.now();
+        this.updateDisplay();
+      }
+    };
+
+    // 棋谱历史管理
+    const moveHistory = {
+      history: [],
+      currentIndex: 0,
+      boardStates: [],
+
+      recordMove(pos, color) {
+        this.history = this.history.slice(0, this.currentIndex);
+        this.boardStates = this.boardStates.slice(0, this.currentIndex);
+        
+        this.history.push({ pos, color });
+        this.boardStates.push(JSON.parse(JSON.stringify(engine.board)));
+        this.currentIndex++;
+      },
+
+      canGoBack() {
+        return this.currentIndex > 0;
+      },
+
+      canGoForward() {
+        return this.currentIndex < this.history.length;
+      },
+
+      goBack() {
+        if (!this.canGoBack()) return;
+        this.currentIndex--;
+        if (this.currentIndex === 0) {
+          engine.reset();
+        } else {
+          engine.board = JSON.parse(JSON.stringify(this.boardStates[this.currentIndex - 1]));
+        }
+      },
+
+      goForward() {
+        if (!this.canGoForward()) return;
+        const move = this.history[this.currentIndex];
+        engine.board = JSON.parse(JSON.stringify(this.boardStates[this.currentIndex]));
+        this.currentIndex++;
+      },
+
+      clear() {
+        this.history = [];
+        this.boardStates = [];
+        this.currentIndex = 0;
+      }
+    };
+
+    // 启动计时器
+    timerManager.start();
+
+    // 菜单控制
+    const menuToggle = document.getElementById('menu-toggle');
+    const menuClose = document.getElementById('menu-close');
+    const dropdownMenu = document.getElementById('dropdown-menu');
+
+    menuToggle?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      dropdownMenu.classList.toggle('open');
+    });
+
+    menuClose?.addEventListener('click', () => {
+      dropdownMenu.classList.remove('open');
+    });
+
+    // 点击菜单外部关闭
+    document.addEventListener('click', (e) => {
+      if (dropdownMenu.classList.contains('open') && 
+          !dropdownMenu.contains(e.target) && 
+          e.target !== menuToggle) {
+        dropdownMenu.classList.remove('open');
+      }
+    });
+
+    // 计分规则切换
+    document.querySelectorAll('[data-scoring-rule]').forEach(toggle => {
+      toggle.addEventListener('click', () => {
+        const rule = toggle.dataset.scoringRule;
+        
+        // 更新 UI
+        document.querySelectorAll('[data-scoring-rule]').forEach(t => t.classList.remove('active'));
+        toggle.classList.add('active');
+        
+        // 设置引擎规则
+        engine.setScoringRule(rule);
+        
+        // 更新显示
+        const ruleText = document.getElementById('current-rule-text');
+        if (ruleText) {
+          ruleText.textContent = rule === 'chinese' ? '中国规则（数子法）' : '日本规则（数目法）';
+        }
+        
+        // 更新形势分析
+        renderer.updateLiveScore();
+      });
     });
 
     renderer.updateUI();
 
-    console.log('炁体围棋已启动');
+    console.log('炁体围棋 v3.0 已启动');
   </script>
 </body>
 </html>
