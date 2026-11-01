@@ -1,0 +1,203 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+}
+
+#app {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  max-width: 1200px;
+  width: 100%;
+  overflow: hidden;
+}
+
+header {
+  background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+  color: white;
+  padding: 20px 30px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 15px;
+}
+
+header h1 {
+  font-size: 28px;
+  font-weight: 600;
+  letter-spacing: 2px;
+}
+
+.controls {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.controls button {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: white;
+  padding: 8px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.3s ease;
+}
+
+.controls button:hover {
+  background: rgba(255, 255, 255, 0.2);
+  border-color: rgba(255, 255, 255, 0.4);
+}
+
+.controls button.active {
+  background: rgba(255, 255, 255, 0.3);
+  border-color: white;
+}
+
+main {
+  padding: 30px;
+}
+
+.game-container {
+  display: flex;
+  gap: 30px;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.board-wrapper {
+  flex: 0 0 auto;
+  position: relative;
+}
+
+#board-canvas {
+  display: block;
+  border-radius: 8px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  cursor: pointer;
+}
+
+.info-panel {
+  flex: 0 0 250px;
+  background: #f8f9fa;
+  border-radius: 8px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.current-player {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 15px;
+  background: white;
+  border-radius: 6px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.player-indicator {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 2px solid #333;
+}
+
+.player-indicator.black {
+  background: radial-gradient(circle at 30% 30%, #555, #000);
+}
+
+.player-indicator.white {
+  background: radial-gradient(circle at 30% 30%, #fff, #ccc);
+}
+
+#current-player-text {
+  font-size: 16px;
+  font-weight: 600;
+  color: #2c3e50;
+}
+
+.captures {
+  background: white;
+  border-radius: 6px;
+  padding: 15px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.capture-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+  font-size: 14px;
+  color: #555;
+}
+
+.capture-info span:last-child {
+  font-weight: 600;
+  font-size: 18px;
+  color: #2c3e50;
+}
+
+.move-count {
+  background: white;
+  border-radius: 6px;
+  padding: 15px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 14px;
+  color: #555;
+}
+
+.move-count span:last-child {
+  font-weight: 600;
+  font-size: 18px;
+  color: #2c3e50;
+}
+
+footer {
+  background: #f8f9fa;
+  padding: 15px 30px;
+  text-align: center;
+  color: #666;
+  font-size: 14px;
+  border-top: 1px solid #e0e0e0;
+}
+
+@media (max-width: 768px) {
+  header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .game-container {
+    flex-direction: column;
+  }
+  
+  .info-panel {
+    flex: 1 1 auto;
+    width: 100%;
+  }
+  
+  #board-canvas {
+    max-width: 100%;
+    height: auto;
+  }
+}
